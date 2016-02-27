@@ -3,14 +3,14 @@ const server = new Hapi.Server();
 
 server.connection({
     host: 'localhost',
-    port: Number(process.argv[2])
+    port: Number(process.argv[2] || 8080)
 });
 
 server.route({
-    path: '/{name}',
+    path: '/',
     method: 'GET',
     handler: function (request, reply) {
-        reply('Hello ' + request.params.name);
+        reply('Hello hapi');
     }
 });
 
