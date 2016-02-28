@@ -10,19 +10,43 @@ server.connection({
 });
 
 server.route({
-    path: '/login',
+    path: '/upload',
     method: 'POST',    
+    handler: function (request, reply) {
+        var body = {
+            description: '',
+            file: {
+                data: '',
+                filename: '',
+                headers: ''
+            }
+        };
+
+        body.description = request.payload.description;
+
+        //https://bl.ocks.org/joyrexus/0c6bd5135d7edeba7b87 
+        //multipart form/file uploading demo for the filename/headers syntax
+        //access using .file.hapi.filename or .file.hapi.headers
+        
+        request.payload.file.on('data', function (data) {
+            body.file.data += data;
+        });
+
+        request.payload.file.on('end', function (data) {
+
+            body.file.filename = request.payload.file.hapi.filename,
+            body.file.headers = request.payload.file.hapi.headers
+
+            console.log(body);
+            reply(JSON.stringify(body));
+        });
+
+    },
     config: {
-        handler: function (request, reply) {
-            reply('login successful');
-        },
-        validate: {
-            payload: Joi.object({
-                isGuest: Joi.boolean().required(),
-                username: Joi.string().when('isGuest', {is: false, then: Joi.required()}),
-                accessToken: Joi.string().alphanum(),
-                password: Joi.string().alphanum()
-            }).options({ allowUnknown: true }).without('password', 'accessToken')
+        payload: {
+            output: 'stream',
+            parse: true,
+            allow: 'multipart/form-data'
         }
     }
 });
